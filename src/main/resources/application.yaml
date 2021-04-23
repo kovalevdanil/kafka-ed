@@ -1,0 +1,16 @@
+kafka:
+  bootstrap-servers: localhost:9092
+  stream:
+    application-id: app-task-2;
+    client-id: client-task-2
+    group-id: group-task-2
+    interval:
+      poll: 10
+      commit: 1000
+    bootstrap-servers: localhost:9092
+
+  topic:
+    person-command: person-command.t
+    person-event: person-event.t
+
+
