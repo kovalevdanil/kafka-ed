@@ -1,6 +1,5 @@
 package com.example.task2v2.kafka.stream;
 
-import com.example.task2v2.cqrs.Command;
 import com.example.task2v2.kafka.serialization.CommandSerde;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.common.serialization.Serdes;
@@ -11,7 +10,6 @@ import org.apache.kafka.streams.kstream.Produced;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.kafka.support.serializer.JsonSerde;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;

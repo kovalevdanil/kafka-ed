@@ -4,14 +4,18 @@ import com.example.task2v2.command.person.create.CreatePersonCommand;
 import com.example.task2v2.command.person.create.CreatePersonResult;
 import com.example.task2v2.command.person.update.UpdatePersonCommand;
 import com.example.task2v2.cqrs.Command;
+import com.example.task2v2.cqrs.CommandInfo;
+import com.example.task2v2.utils.ClassUtils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.kafka.common.errors.SerializationException;
 import org.apache.kafka.common.serialization.Deserializer;
+import org.reflections.Reflections;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 public class CommandDeserializer implements Deserializer<Command<?>> {
 
@@ -23,7 +27,16 @@ public class CommandDeserializer implements Deserializer<Command<?>> {
     static {
         commandIdClass = new HashMap<>();
 
+        Reflections reflections = new Reflections("com.example.task2v2");
 
+        Set<Class<? extends Command>> commandClasses = reflections.getSubTypesOf(Command.class);
+
+        commandClasses.stream()
+                .filter(clazz -> clazz.isAnnotationPresent(CommandInfo.class))
+                .forEach(clazz -> {
+                    CommandInfo info = clazz.getAnnotation(CommandInfo.class);
+                    commandIdClass.put(info.id(), (Class<? extends Command<?>>) clazz);
+                });
 
     }
 
@@ -41,7 +54,7 @@ public class CommandDeserializer implements Deserializer<Command<?>> {
                 throw new SerializationException("Command payload should have field '" + COMMAND_ID_FIELD + "'");
             }
 
-            Class<? extends Command<?>> targetClass = findCommandClassById(commandId);
+            Class<? extends Command> targetClass = findCommandClassById(commandId);
             if (targetClass == null){
                 throw new SerializationException("Unable to resolve command id " + commandId);
             }
@@ -52,7 +65,7 @@ public class CommandDeserializer implements Deserializer<Command<?>> {
         }
     }
 
-    private Class<? extends Command<?>> findCommandClassById(String commandId){
-        return UpdatePersonCommand.class;
+    private Class<? extends Command> findCommandClassById(String commandId){
+        return commandIdClass.get(commandId);
     }
 }
